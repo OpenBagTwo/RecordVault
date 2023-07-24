@@ -3,23 +3,24 @@
 	"id": "ronco-record-vault",
 	"version": "${version}",
 	"name": "Ronco Record Vault",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Store records in chiseled bookshelves",
 	"authors": [
-		"Me!"
+		"OpenBagTwo"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/OpenBagTwo/FoxNap",
+		"sources": "https://github.com/OpenBagTwo/FoxNap",
+		"issues": "https://github.com/OpenBagTwo/FoxNap/issues"
 	},
-	"license": "CC0-1.0",
+	"license": "GPL-3.0-only",
 	"icon": "assets/ronco-record-vault/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"io.github.openbagtwo.ronco.ExampleMod"
+			"io.github.openbagtwo.ronco.RoncoRecordVault"
 		],
 		"client": [
-			"io.github.openbagtwo.ronco.ExampleModClient"
+			"io.github.openbagtwo.ronco.RoncoRecordVaultClient"
 		]
 	},
 	"mixins": [
@@ -36,6 +37,6 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"foxnap": "*"
 	}
 }
