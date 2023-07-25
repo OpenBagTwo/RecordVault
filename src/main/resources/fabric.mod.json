@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "ronco-record-vault",
+	"id": "record-vault",
 	"version": "${version}",
 	"name": "Ronco Record Vault",
 	"description": "Store records in chiseled bookshelves",
@@ -8,25 +8,25 @@
 		"OpenBagTwo"
 	],
 	"contact": {
-		"homepage": "https://github.com/OpenBagTwo/FoxNap",
-		"sources": "https://github.com/OpenBagTwo/FoxNap",
-		"issues": "https://github.com/OpenBagTwo/FoxNap/issues"
+		"homepage": "https://github.com/OpenBagTwo/RecordVault",
+		"sources": "https://github.com/OpenBagTwo/RecordVault",
+		"issues": "https://github.com/OpenBagTwo/RecordVault/issues"
 	},
 	"license": "GPL-3.0-only",
-	"icon": "assets/ronco-record-vault/icon.png",
+	"icon": "assets/record-vault/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"io.github.openbagtwo.ronco.RoncoRecordVault"
+			"io.github.openbagtwo.ronco.RecordVaultMod"
 		],
 		"client": [
-			"io.github.openbagtwo.ronco.RoncoRecordVaultClient"
+			"io.github.openbagtwo.ronco.RecordVaultClient"
 		]
 	},
 	"mixins": [
-		"ronco-record-vault.mixins.json",
+		"record-vault.mixins.json",
 		{
-			"config": "ronco-record-vault.client.mixins.json",
+			"config": "record-vault.client.mixins.json",
 			"environment": "client"
 		}
 	],
