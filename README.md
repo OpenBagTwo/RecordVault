@@ -6,7 +6,10 @@
 ![supported versions](https://img.shields.io/badge/Supported_Versions-1.20.1-blue)
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/record-vault)](https://modrinth.com/mod/record-vault)
 
+![logo](_static/logo.png)
+
 _**Store records in chiseled bookshelves**_
+
 
 <img src="https://i.imgur.com/Ol1Tcf8.png" alt="Requires Fabric" width="150"/>
 
