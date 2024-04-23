@@ -1,14 +1,14 @@
 package io.github.openbagtwo.ronco.mixin;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChiseledBookshelfBlock;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.item.MusicDiscItem;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -21,9 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,16 +36,17 @@ public abstract class RecordVault {
   }
 
   @Invoker("getSlotForHitPos")
-  static int getSlotForHitPos(Vec2f hitPos){
+  static OptionalInt getSlotForHitPos(BlockHitResult hit, BlockState state){
     throw new AssertionError();
   }
 
   @Inject(
-      method="onUse(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
+      method="onUseWithItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ItemActionResult;",
       at=@At("HEAD"),
       cancellable = true
   )
   public void onUsingRecord(
+      ItemStack stack,
       BlockState state,
       World world,
       BlockPos pos,
@@ -58,14 +57,11 @@ public abstract class RecordVault {
   ) {
     BlockEntity maybeBookshelf = world.getBlockEntity(pos);
     if (maybeBookshelf instanceof ChiseledBookshelfBlockEntity chiseledBookshelfBlockEntity) {
-      Optional shelf = this.getHitPos(hit, state.get(HorizontalFacingBlock.FACING));
-      if (!shelf.isEmpty()) {
-        int slot = this.getSlotForHitPos((Vec2f)shelf.get());
-        if (!(Boolean)state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot)))
-        {
-          ItemStack itemStack = player.getStackInHand(hand);
-          if (itemStack.isIn(ItemTags.MUSIC_DISCS)) {
-            tryAddRecord(world, pos, player, chiseledBookshelfBlockEntity, itemStack, slot);
+      if (stack.getItem() instanceof MusicDiscItem){
+        OptionalInt slot = this.getSlotForHitPos(hit, state);
+        if (slot.isEmpty()) {
+          if (!((Boolean)state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
+            tryAddRecord(world, pos, player, chiseledBookshelfBlockEntity, stack, slot.getAsInt());
             callbackInfo.setReturnValue(ActionResult.success(world.isClient));
             callbackInfo.cancel();
           }
@@ -84,7 +80,6 @@ public abstract class RecordVault {
       if (player.isCreative()) {
         stack.increment(1);
       }
-      world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
     }
   }
 
