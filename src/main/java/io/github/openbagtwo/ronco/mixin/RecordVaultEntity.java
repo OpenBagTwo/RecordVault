@@ -1,8 +1,8 @@
 package io.github.openbagtwo.ronco.mixin;
 
 import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +21,7 @@ public abstract class RecordVaultEntity {
 
 	@Unique
 	private boolean isValidForBookshelf(ItemStack stack) {
-		return stack.isIn(ItemTags.BOOKSHELF_BOOKS) || (stack.getItem() instanceof MusicDiscItem);
+		return stack.isIn(ItemTags.BOOKSHELF_BOOKS) || (stack.get(DataComponentTypes.JUKEBOX_PLAYABLE) != null);
 	}
 
 	/**

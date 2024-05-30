@@ -3,7 +3,7 @@
 ![server + client mod](https://img.shields.io/badge/Server\/Client-both-purple)
 ![mod loader: fabric](https://img.shields.io/badge/Mod_Loader-fabric%2Fquilt-a4cc37)
 [![build status](https://github.com/OpenBagTwo/RecordVault/actions/workflows/build.yml/badge.svg)](https://github.com/OpenBagTwo/RecordVault/actions/workflows/build.yml)
-![supported versions](https://img.shields.io/badge/Supported_Versions-1.20--1.20.5-blue)
+![supported versions](https://img.shields.io/badge/Supported_Versions-1.20--1.21-blue)
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/record-vault)](https://modrinth.com/mod/record-vault)
 
 ![logo](_static/logo.png)

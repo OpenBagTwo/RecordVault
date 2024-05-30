@@ -5,9 +5,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ChiseledBookshelfBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -47,7 +47,7 @@ public abstract class RecordVault {
   ) {
     BlockEntity maybeBookshelf = world.getBlockEntity(pos);
     if (maybeBookshelf instanceof ChiseledBookshelfBlockEntity chiseledBookshelfBlockEntity) {
-      if (stack.getItem() instanceof MusicDiscItem){
+      if (stack.get(DataComponentTypes.JUKEBOX_PLAYABLE) != null){
         OptionalInt slot = this.getSlotForHitPos(hit, state);
         if (!slot.isEmpty()) {
           if (!((Boolean) state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
