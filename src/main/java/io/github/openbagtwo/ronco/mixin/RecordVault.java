@@ -19,6 +19,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class RecordVault {
 
   @Invoker("getSlotForHitPos")
-  abstract OptionalInt getSlotForHitPos(BlockHitResult hit, BlockState state);
+  abstract OptionalInt grabSlotForHitPos(BlockHitResult hit, BlockState state);
 
   @Inject(
       method="onUseWithItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
@@ -48,7 +49,7 @@ public abstract class RecordVault {
     BlockEntity maybeBookshelf = world.getBlockEntity(pos);
     if (maybeBookshelf instanceof ChiseledBookshelfBlockEntity chiseledBookshelfBlockEntity) {
       if (stack.get(DataComponentTypes.JUKEBOX_PLAYABLE) != null){
-        OptionalInt slot = this.getSlotForHitPos(hit, state);
+        OptionalInt slot = this.grabSlotForHitPos(hit, state);
         if (!slot.isEmpty()) {
           if (!((Boolean) state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
             tryAddRecord(world, pos, player, chiseledBookshelfBlockEntity, stack, slot.getAsInt());
@@ -60,16 +61,14 @@ public abstract class RecordVault {
     }
   }
 
+  @Unique
   private static void tryAddRecord(World world, BlockPos pos, PlayerEntity player, ChiseledBookshelfBlockEntity blockEntity, ItemStack stack, int slot) {
     if (!world.isClient) {
       // treat it like an enchanted book
       player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
       SoundEvent soundEvent = SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT_ENCHANTED;
-      blockEntity.setStack(slot, stack.split(1));
+      blockEntity.setStack(slot, stack.splitUnlessCreative(1, player));
       world.playSound((PlayerEntity)null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
-      if (player.isCreative()) {
-        stack.increment(1);
-      }
     }
   }
 

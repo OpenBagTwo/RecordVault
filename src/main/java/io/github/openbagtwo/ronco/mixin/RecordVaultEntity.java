@@ -31,8 +31,9 @@ public abstract class RecordVaultEntity {
 	@Overwrite
 	public boolean isValid(int slot, ItemStack stack) {
 		return (
-				isValidForBookshelf(stack)
-						&& ((ChiseledBookshelfBlockEntity)(Object)this).getStack(slot).isEmpty()
+			isValidForBookshelf(stack)
+				&& ((ChiseledBookshelfBlockEntity)(Object)this).getStack(slot).isEmpty()
+				&& stack.getCount() == ((ChiseledBookshelfBlockEntity)(Object)this).getMaxCountPerStack()
 		);
 	}
 	/**
@@ -44,6 +45,8 @@ public abstract class RecordVaultEntity {
 		if (isValidForBookshelf(stack)) {
 			this.inventory.set(slot, stack);
 			this.updateState(slot);
+		} else if (stack.isEmpty()) {
+			((ChiseledBookshelfBlockEntity)(Object)this).removeStack(slot, 1);
 		}
 
 	}
