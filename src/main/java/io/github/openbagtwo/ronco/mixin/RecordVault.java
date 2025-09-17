@@ -12,15 +12,18 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -28,8 +31,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ChiseledBookshelfBlock.class)
 public abstract class RecordVault {
 
-  @Invoker("getSlotForHitPos")
-  abstract OptionalInt grabSlotForHitPos(BlockHitResult hit, BlockState state);
+  @Shadow
+  @Final
+  public static EnumProperty<Direction> FACING;
 
   @Inject(
       method="onUseWithItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
@@ -49,7 +53,7 @@ public abstract class RecordVault {
     BlockEntity maybeBookshelf = world.getBlockEntity(pos);
     if (maybeBookshelf instanceof ChiseledBookshelfBlockEntity chiseledBookshelfBlockEntity) {
       if (stack.get(DataComponentTypes.JUKEBOX_PLAYABLE) != null){
-        OptionalInt slot = this.grabSlotForHitPos(hit, state);
+        OptionalInt slot = ((ChiseledBookshelfBlock) (Object) this).getHitSlot(hit, state.get(FACING));
         if (!slot.isEmpty()) {
           if (!((Boolean) state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
             tryAddRecord(world, pos, player, chiseledBookshelfBlockEntity, stack, slot.getAsInt());
@@ -63,12 +67,12 @@ public abstract class RecordVault {
 
   @Unique
   private static void tryAddRecord(World world, BlockPos pos, PlayerEntity player, ChiseledBookshelfBlockEntity blockEntity, ItemStack stack, int slot) {
-    if (!world.isClient) {
+    if (!world.isClient()) {
       // treat it like an enchanted book
       player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
       SoundEvent soundEvent = SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT_ENCHANTED;
       blockEntity.setStack(slot, stack.splitUnlessCreative(1, player));
-      world.playSound((PlayerEntity)null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+      world.playSound(null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
   }
 
