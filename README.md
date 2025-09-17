@@ -11,8 +11,6 @@
 _**Store records in chiseled bookshelves**_
 
 
-<img src="https://i.imgur.com/Ol1Tcf8.png" alt="Requires Fabric" width="150"/>
-
 ## What Does This Mod Do?
 
 This mod allows you to store music discs in chiseled bookshelves. That's it. Placing
