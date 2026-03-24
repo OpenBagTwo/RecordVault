@@ -1,25 +1,25 @@
 package io.github.openbagtwo.ronco.mixin;
 
 import java.util.OptionalInt;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ChiseledBookshelfBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ChiseledBookshelfBlock.class)
+@Mixin(ChiseledBookShelfBlock.class)
 public abstract class RecordVault {
 
   @Shadow
@@ -36,28 +36,28 @@ public abstract class RecordVault {
   public static EnumProperty<Direction> FACING;
 
   @Inject(
-      method="onUseWithItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
+      method="useItemOn(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;",
       at=@At("HEAD"),
       cancellable = true
   )
   public void onUsingRecord(
       ItemStack stack,
       BlockState state,
-      World world,
+      Level world,
       BlockPos pos,
-      PlayerEntity player,
-      Hand hand,
+      Player player,
+      InteractionHand hand,
       BlockHitResult hit,
-      CallbackInfoReturnable<ActionResult> callbackInfo
+      CallbackInfoReturnable<InteractionResult> callbackInfo
   ) {
     BlockEntity maybeBookshelf = world.getBlockEntity(pos);
-    if (maybeBookshelf instanceof ChiseledBookshelfBlockEntity chiseledBookshelfBlockEntity) {
-      if (stack.get(DataComponentTypes.JUKEBOX_PLAYABLE) != null){
-        OptionalInt slot = ((ChiseledBookshelfBlock) (Object) this).getHitSlot(hit, state.get(FACING));
+    if (maybeBookshelf instanceof ChiseledBookShelfBlockEntity chiseledBookshelfBlockEntity) {
+      if (stack.get(DataComponents.JUKEBOX_PLAYABLE) != null){
+        OptionalInt slot = ((ChiseledBookShelfBlock) (Object) this).getHitSlot(hit, state.getValue(FACING));
         if (!slot.isEmpty()) {
-          if (!((Boolean) state.get((Property)ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
+          if (!((Boolean) state.getValue((Property)ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt())))) {
             tryAddRecord(world, pos, player, chiseledBookshelfBlockEntity, stack, slot.getAsInt());
-            callbackInfo.setReturnValue(ActionResult.SUCCESS);
+            callbackInfo.setReturnValue(InteractionResult.SUCCESS);
             callbackInfo.cancel();
           }
         }
@@ -66,13 +66,13 @@ public abstract class RecordVault {
   }
 
   @Unique
-  private static void tryAddRecord(World world, BlockPos pos, PlayerEntity player, ChiseledBookshelfBlockEntity blockEntity, ItemStack stack, int slot) {
-    if (!world.isClient()) {
+  private static void tryAddRecord(Level world, BlockPos pos, Player player, ChiseledBookShelfBlockEntity blockEntity, ItemStack stack, int slot) {
+    if (!world.isClientSide()) {
       // treat it like an enchanted book
-      player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
-      SoundEvent soundEvent = SoundEvents.BLOCK_CHISELED_BOOKSHELF_INSERT_ENCHANTED;
-      blockEntity.setStack(slot, stack.splitUnlessCreative(1, player));
-      world.playSound(null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+      player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
+      SoundEvent soundEvent = SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED;
+      blockEntity.setItem(slot, stack.consumeAndReturn(1, player));
+      world.playSound(null, pos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
     }
   }
 
